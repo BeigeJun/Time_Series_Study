@@ -1,0 +1,2 @@
+RNN - https://www.youtube.com/watch?v=PahF2hZM6cs
+LSTM - https://www.youtube.com/watch?v=bX6GLbpw-A4
