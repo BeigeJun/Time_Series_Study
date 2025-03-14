@@ -47,35 +47,31 @@ X_test_tensors_f = torch.reshape(X_test_tensors, (X_test_tensors.shape[0], 1, X_
 # print('Testing Shape :', X_test.shape, y_test.shape)
 
 
-class LSTM(nn.Module):
+class GRU(nn.Module):
     def __init__(self, num_classes, input_size, hidden_size, num_layers, seq_length):
-        super(LSTM, self).__init__()
+        super(GRU, self).__init__()
         self.num_classes = num_classes
         self.num_layers = num_layers
         self.input_size = input_size
         self.hidden_size = hidden_size
-
         self.seq_length = seq_length
 
-        self.lstm = nn.LSTM(input_size=input_size, hidden_size=hidden_size,
-                            num_layers=num_layers, batch_first=True)
+        self.gru = nn.GRU(input_size=input_size, hidden_size=hidden_size, num_layers=num_layers, batch_first=True)
 
         self.fc_1 = nn.Linear(hidden_size, 128)
         self.fc = nn.Linear(128, num_classes)
         self.relu = nn.ReLU()
 
     def forward(self, x):
-        h_0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size).to(device).requires_grad_()
-        c_0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size).to(device).requires_grad_()
+        h_0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size).to(x.device)
 
-        output, (hn, cn) = self.lstm(x, (h_0, c_0))
+        output, hn = self.gru(x, h_0)
 
         hn = hn[-1]
 
         out = self.relu(hn)
         out = self.fc_1(out)
         out = self.relu(out)
-
         out = self.fc(out)
 
         return out
@@ -89,7 +85,7 @@ hidden_size = 10
 num_layers = 1
 num_classes = 1
 
-model = LSTM(num_classes, input_size, hidden_size, num_layers, X_train_tensors_f.shape[1])
+model = GRU(num_classes, input_size, hidden_size, num_layers, X_train_tensors_f.shape[1])
 model.to(device)
 criterion = torch.nn.MSELoss()
 optimizer = torch.optim.Adam(model.parameters(), lr)
